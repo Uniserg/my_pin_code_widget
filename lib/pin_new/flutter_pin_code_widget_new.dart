@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:my_pin_code_widget/pin_new/widgets/keyboard.dart';
 
 class PinCodeWidgetNew extends StatefulWidget {
-  const PinCodeWidgetNew(
-      {super.key,
-      required this.onEnter,
-      required this.pinLen,
-      required this.onChangedPin,
-      this.clearStream,
-      this.centerBottomWidget,
-      this.filledIndicatorColor,
-      this.keyboardStyle,
-      this.pinSize = 20,
-      this.pinInflateRatio = 1.8,
-      this.pinSpacing = 18, 
-      this.marginPincode = EdgeInsets.zero,
-      });
+  const PinCodeWidgetNew({
+    super.key,
+    required this.pinLen,
+    required this.onChangedPin,
+    this.clearStream,
+    this.centerBottomWidget,
+    this.filledIndicatorColor,
+    this.keyboardStyle,
+    this.pinSize = 20,
+    this.pinInflateRatio = 1.5,
+    this.pinSpacing = 15,
+    this.marginPincode = const EdgeInsets.only(bottom: 20),
+  });
 
   final KeyboardStyle? keyboardStyle;
-
-  /// Callback after all pins input
-  final void Function(String pin, PinCodeWidgetNewState state) onEnter;
 
   /// Callback onChange
   final void Function(String pin) onChangedPin;
@@ -74,8 +69,6 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
         }
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
   }
 
   void clear() {
@@ -88,18 +81,6 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
         pin = '';
       });
 
-  void calculateAspectRatio() {
-    final renderBox =
-        _gridViewKey.currentContext!.findRenderObject() as RenderBox;
-    final cellWidth = renderBox.size.width / 3;
-    final cellHeight = renderBox.size.height / 4;
-    if (cellWidth > 0 && cellHeight > 0) {
-      _aspectRatio = cellWidth / cellHeight;
-    }
-
-    setState(() {});
-  }
-
   void changeProcessText(String text) {}
 
   void close() {
@@ -110,7 +91,7 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
       widget.filledIndicatorColor ?? Theme.of(context).primaryColor;
 
   Widget get pinCode => SizedBox(
-        height: widget.pinSize * widget.pinInflateRatio,
+        height: widget.pinSize * (widget.pinInflateRatio + _aspectRatio),
         child: ListView(
           controller: listController,
           scrollDirection: Axis.horizontal,
@@ -121,7 +102,8 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
 
             if (index == pin.length - 1) {
               return AnimatedContainer(
-                margin: EdgeInsets.only(right: widget.pinSpacing, left: widget.pinSpacing),
+                margin: EdgeInsets.only(
+                    right: widget.pinSpacing, left: widget.pinSpacing),
                 width: animate ? size : size * inflateRatio,
                 height: !animate ? size : size * inflateRatio,
                 duration: const Duration(milliseconds: 300),
@@ -133,7 +115,8 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
               );
             }
             return Container(
-              margin: EdgeInsets.only(right: widget.pinSpacing, left: widget.pinSpacing),
+              margin: EdgeInsets.only(
+                  right: widget.pinSpacing, left: widget.pinSpacing),
               width: size,
               height: size,
               decoration: BoxDecoration(
@@ -148,35 +131,31 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
   @override
   Widget build(BuildContext context) => Scaffold(
         key: _key,
-        body: body(context),
         resizeToAvoidBottomInset: false,
-      );
-
-  Widget body(BuildContext context) {
-    return MeasureSize(
-      onChange: (size) {
-        calculateAspectRatio();
-      },
-      child: Container(
-        key: _gridViewKey,
-        child: Column(
-          children: [
-            Container(
-              margin: widget.marginPincode,
-              child: pinCode,
-              ),
-            KeyboardWidget(onPressed: _onPressed, onDeletePressed: _onRemove),
-            widget.centerBottomWidget != null
-                ? Flexible(
-                    flex: 2,
-                    child: Center(child: widget.centerBottomWidget!),
-                  )
-                : const SizedBox(),
-          ],
+        body: SingleChildScrollView(
+          child: Container(
+            key: _gridViewKey,
+            child: Column(
+              children: [
+                Container(
+                  margin: widget.marginPincode,
+                  child: pinCode,
+                ),
+                KeyboardWidget(
+                  onPressed: _onPressed,
+                  onDeletePressed: _onRemove,
+                ),
+                widget.centerBottomWidget != null
+                    ? Flexible(
+                        flex: 2,
+                        child: Center(child: widget.centerBottomWidget!),
+                      )
+                    : const SizedBox(),
+              ],
+            ),
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   void _onPressed(int num) async {
     if (currentPinLength >= widget.pinLen) {
@@ -202,47 +181,5 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
       return;
     }
     setState(() => pin = pin.substring(0, pin.length - 1));
-  }
-
-  void _afterLayout(dynamic _) {
-    calculateAspectRatio();
-  }
-}
-
-typedef OnWidgetSizeChange = void Function(Size size);
-
-class _MeasureSizeRenderObject extends RenderProxyBox {
-  Size? oldSize;
-  final OnWidgetSizeChange onChange;
-
-  _MeasureSizeRenderObject(this.onChange);
-
-  @override
-  void performLayout() {
-    super.performLayout();
-
-    Size newSize = child!.size;
-    if (oldSize == newSize) return;
-
-    oldSize = newSize;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      onChange(newSize);
-    });
-  }
-}
-
-class MeasureSize extends SingleChildRenderObjectWidget {
-  const MeasureSize({
-    Key? key,
-    required this.onChange,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  /// Function to be called when layout changes
-  final OnWidgetSizeChange onChange;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _MeasureSizeRenderObject(onChange);
   }
 }

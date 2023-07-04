@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
 class KeyboardStyle {
-  final double _aspectRatio;
   final Color? _deleteButtonColor;
   final Color? _onPressColorAnimation;
   final Color? _buttonColor;
   final Icon _deleteIcon;
   final TextStyle? _numberStyle;
   final BorderSide? _borderSide;
+  final double width;
+  final double height;
+  final double horizontalSpacing;
+  final double verticalSpacing;
 
   const KeyboardStyle(
-      {aspectRatio,
+      {this.width = 400,
+      this.height = 600,
+      this.horizontalSpacing = 30,
+      this.verticalSpacing = 30,
       deleteButtonColor,
       onPressColorAnimation,
       buttonColor,
       deleteIcon,
       numberStyle,
       borderSide})
-      : _aspectRatio = aspectRatio ?? 1,
-        _deleteButtonColor = deleteButtonColor,
+      : _deleteButtonColor = deleteButtonColor,
         _onPressColorAnimation = onPressColorAnimation,
         _buttonColor = buttonColor,
         _deleteIcon = deleteIcon ?? const Icon(Icons.arrow_back_rounded),
@@ -36,8 +41,6 @@ class KeyboardStyle {
       BorderSide(color: Theme.of(context).colorScheme.onPrimary, width: 2);
   TextStyle? getNumberStyle(BuildContext context) =>
       _numberStyle ?? Theme.of(context).primaryTextTheme.displayMedium;
-
-  double get aspectRatio => _aspectRatio;
   Icon get deleteIcon => _deleteIcon;
 }
 
@@ -55,60 +58,56 @@ class KeyboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 3,
-      childAspectRatio: keyboardStyle.aspectRatio,
-      physics: const NeverScrollableScrollPhysics(),
-      children: List.generate(
-        11,
-        (index) {
-          const double marginRight = 15;
-          const double marginLeft = 15;
-          const double marginBottom = 4;
+    return Center(
+      child: Container(
+        alignment: Alignment.center,
+        width: keyboardStyle.width,
+        height: keyboardStyle.height,
+        child: GridView.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: keyboardStyle.verticalSpacing,
+          crossAxisSpacing: keyboardStyle.horizontalSpacing,
+          children: List.generate(
+            12,
+            (index) {
+              if (index == 9) return Container();
 
-          if (index == 9) {
-            return Container(
-              margin:
-                  const EdgeInsets.only(left: marginLeft, right: marginRight),
-              child: MergeSemantics(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        keyboardStyle.getDeleteButtonColor(context),
-                    foregroundColor:
-                        keyboardStyle.getOnPressColorAnimation(context),
-                    side: keyboardStyle.getBorderSide(context),
-                    shape: const CircleBorder(),
+              if (index == 11) {
+                return MergeSemantics(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          keyboardStyle.getDeleteButtonColor(context),
+                      foregroundColor:
+                          keyboardStyle.getOnPressColorAnimation(context),
+                      side: keyboardStyle.getBorderSide(context),
+                      shape: const CircleBorder(),
+                    ),
+                    onPressed: onDeletePressed,
+                    child: keyboardStyle.deleteIcon,
                   ),
-                  onPressed: onDeletePressed,
-                  child: keyboardStyle.deleteIcon,
+                );
+              } else if (index == 10) {
+                index = 0;
+              } else if (index == 11) {
+              } else {
+                index++;
+              }
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: keyboardStyle.getButtonColor(context),
+                  foregroundColor:
+                      keyboardStyle.getOnPressColorAnimation(context),
+                  side: keyboardStyle.getBorderSide(context),
+                  shape: const CircleBorder(),
                 ),
-              ),
-            );
-          } else if (index == 10) {
-            index = 0;
-          } else if (index == 11) {
-          } else {
-            index++;
-          }
-          return Container(
-            margin: const EdgeInsets.only(
-                left: marginLeft, right: marginRight, bottom: marginBottom),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: keyboardStyle.getButtonColor(context),
-                foregroundColor:
-                    keyboardStyle.getOnPressColorAnimation(context),
-                side: keyboardStyle.getBorderSide(context),
-                shape: const CircleBorder(),
-              ),
-              onPressed: () => onPressed!(index),
-              child:
-                  Text('$index', style: keyboardStyle.getNumberStyle(context)),
-            ),
-          );
-        },
+                onPressed: () => onPressed!(index),
+                child: Text('$index',
+                    style: keyboardStyle.getNumberStyle(context)),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

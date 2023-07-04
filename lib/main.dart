@@ -11,7 +11,6 @@ class MainApp extends StatelessWidget {
 
   get newPin => PinCodeWidgetNew(
         onChangedPin: (String pin) {},
-        onEnter: (String pin, PinCodeWidgetNewState<PinCodeWidgetNew> state) {},
         pinLen: 4,
       );
 
@@ -28,7 +27,7 @@ class MainApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: Container(
-            margin: const EdgeInsets.only(top: 150),
+              margin: const EdgeInsets.only(top: 100),
               alignment: Alignment.center,
               padding: const EdgeInsets.all(8),
               child: newPin),
