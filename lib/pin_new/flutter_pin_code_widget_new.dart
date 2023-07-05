@@ -81,8 +81,6 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
         pin = '';
       });
 
-  void changeProcessText(String text) {}
-
   void close() {
     Navigator.of(_key.currentContext!).pop();
   }
