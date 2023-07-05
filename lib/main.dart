@@ -11,6 +11,7 @@ class MainApp extends StatelessWidget {
 
   get newPin => PinCodeWidgetNew(
         onFilledPin: (String pin) {},
+        onAuth: (pin) async => pin == "1234",
         pinLen: 4,
       );
 

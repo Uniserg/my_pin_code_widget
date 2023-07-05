@@ -1,127 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_pin_code_widget/pin_new/notifiers/pin_notifier.dart';
 import 'package:my_pin_code_widget/pin_new/widgets/keyboard.dart';
+import 'package:my_pin_code_widget/pin_new/widgets/pin_numbers.dart';
 
 class PinCodeWidgetNew extends StatefulWidget {
-  const PinCodeWidgetNew(
-      {super.key,
-      required this.pinLen,
-      required this.onFilledPin,
-      this.pinColor,
-      this.keyboardStyle,
-      this.pinSize = 20,
-      this.pinInflateRatio = 1.5,
-      this.pinSpacing = 15,
-      this.marginPincode = const EdgeInsets.only(bottom: 10),
-      this.authButton});
+  const PinCodeWidgetNew({
+    super.key,
+    required this.pinLen,
+    required this.onFilledPin,
+    required this.onAuth,
+    this.keyboardStyle,
+    this.marginPincode = const EdgeInsets.only(bottom: 10),
+    this.authButton,
+    this.pinNumbersStyle = const PinNumbersStyle(),
+  });
 
   final KeyboardStyle? keyboardStyle;
+
+  final PinNumbersStyle pinNumbersStyle;
 
   final Widget? authButton;
 
   final void Function(String pin) onFilledPin;
 
+  final Future<bool> Function(String pin) onAuth;
+
   final int pinLen;
 
-  final double pinSize;
-
-  final double pinInflateRatio;
-
-  final double pinSpacing;
-
   final EdgeInsets marginPincode;
-
-  final Color? pinColor;
 
   @override
   State<StatefulWidget> createState() => PinCodeWidgetNewState();
 }
 
 class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
-  final ScrollController listController = ScrollController();
-
-  late String pin;
-  bool animate = false;
-
-  int get currentPinLength => pin.length;
+  late PinNotifier pinNotifier;
 
   @override
   void initState() {
+    pinNotifier = PinNotifier(widget.pinLen);
     super.initState();
-    pin = '';
   }
 
-  void reset() => setState(() {
-        pin = '';
-      });
+  @override
+  void dispose() {
+    pinNotifier.dispose();
+    super.dispose();
+  }
+
+  // void runleInflateAnimation() {
+  //   Future.delayed(const Duration(milliseconds: 60)).then((value) {
+  //     setState(() {
+  //       animate = true;
+  //     });
+  //   });
+  // }
+
+  // void runHeavyImpactAnimation() {
+  //   Future.delayed(const Duration(milliseconds: 60)).then((value) {
+  //     setState(() {
+  //       animate = true;
+  //     });
+  //   });
+  // }
 
   void _onPressed(int num) async {
-    if (currentPinLength >= widget.pinLen) {
-      await HapticFeedback.heavyImpact();
-      return;
-    }
-    setState(() {
-      animate = false;
+    // if (currentPinLength >= widget.pinLen) {
+    //   // await HapticFeedback.heavyImpact(); // зачем это????
+    //   return;
+    // }
 
-      pin += num.toString();
-      
-      widget.onFilledPin(pin);
+    // if (isFilled) {
+    //   getPinColor = widget.pinNumbersStyle.getPinPrimaryColor;
+    //   setState(() {
+    //     pinNotifier.clear();
+    //     isFilled = false;
+    //   });
+    // }
+
+    // setState(() {
+    //   animate = false;
+    //   pinNotifier.addNum(num);
+    // });
+    setState(() {
+        pinNotifier.addNum(num);    
     });
-    Future.delayed(const Duration(milliseconds: 60)).then((value) {
+    
+
+    setState(() {
+          Future.delayed(const Duration(milliseconds: 60)).then((value) {
       setState(() {
-        animate = true;
+      pinNotifier.runleInflateAnimation();  
       });
+    });   
     });
-    listController.jumpTo(listController.position.maxScrollExtent);
+    
+
+    // if (currentPinLength == widget.pinLen) {
+    //   isFilled = true;
+    //   bool isAuth = await widget.onAuth(pinNotifier.pin); // авторизация
+    //   if (!isAuth) {
+    //     getPinColor = widget.pinNumbersStyle.getPinFailedColor;
+    //     await HapticFeedback.heavyImpact();
+    //   }
+    // }
   }
 
   void _onRemove() {
-    if (currentPinLength == 0) {
+    if (pinNotifier.pinLen == 0) {
       return;
     }
-    setState(() => pin = pin.substring(0, pin.length - 1));
+
+    setState(() {
+          pinNotifier.pop();      
+    });
   }
-
-  Color getPinColor(context) =>
-      widget.pinColor ?? Theme.of(context).primaryColor;
-
-  Widget get pinCode => SizedBox(
-        height: widget.pinSize * widget.pinInflateRatio,
-        child: ListView(
-          controller: listController,
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
-          children: List.generate(pin.length, (index) {
-            var size = widget.pinSize;
-            var inflateRatio = widget.pinInflateRatio;
-
-            if (index == pin.length - 1) {
-              return AnimatedContainer(
-                margin: EdgeInsets.only(
-                    right: widget.pinSpacing, left: widget.pinSpacing),
-                width: animate ? size : size * inflateRatio,
-                height: !animate ? size : size * inflateRatio,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: getPinColor(context),
-                ),
-              );
-            }
-            return Container(
-              margin: EdgeInsets.only(
-                  right: widget.pinSpacing, left: widget.pinSpacing),
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: getPinColor(context),
-              ),
-            );
-          }),
-        ),
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +123,8 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
       children: [
         Container(
           margin: widget.marginPincode,
-          child: pinCode,
+          child:
+              PinNumbersWidget(pinLen: widget.pinLen, pinNotifier: pinNotifier, style: widget.pinNumbersStyle,),
         ),
         KeyboardWidget(
           onPressed: _onPressed,
