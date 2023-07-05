@@ -3,27 +3,23 @@ import 'package:flutter/services.dart';
 import 'package:my_pin_code_widget/pin_new/widgets/keyboard.dart';
 
 class PinCodeWidgetNew extends StatefulWidget {
-  const PinCodeWidgetNew({
-    super.key,
-    required this.pinLen,
-    required this.onChangedPin,
-    this.clearStream,
-    this.centerBottomWidget,
-    this.filledIndicatorColor,
-    this.keyboardStyle,
-    this.pinSize = 20,
-    this.pinInflateRatio = 1.5,
-    this.pinSpacing = 15,
-    this.marginPincode = const EdgeInsets.only(bottom: 20),
-  });
+  const PinCodeWidgetNew(
+      {super.key,
+      required this.pinLen,
+      required this.onFilledPin,
+      this.pinColor,
+      this.keyboardStyle,
+      this.pinSize = 20,
+      this.pinInflateRatio = 1.5,
+      this.pinSpacing = 15,
+      this.marginPincode = const EdgeInsets.only(bottom: 10),
+      this.authButton});
 
   final KeyboardStyle? keyboardStyle;
 
-  /// Callback onChange
-  final void Function(String pin) onChangedPin;
+  final Widget? authButton;
 
-  /// Event for clear pin
-  final Stream<bool>? clearStream;
+  final void Function(String pin) onFilledPin;
 
   final int pinLen;
 
@@ -35,23 +31,16 @@ class PinCodeWidgetNew extends StatefulWidget {
 
   final EdgeInsets marginPincode;
 
-  /// Any widgets on the empty place, usually - 'forgot?'
-  final Widget? centerBottomWidget;
-
-  /// filled pins color
-  final Color? filledIndicatorColor;
+  final Color? pinColor;
 
   @override
   State<StatefulWidget> createState() => PinCodeWidgetNewState();
 }
 
 class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
-  final _gridViewKey = GlobalKey();
-  final _key = GlobalKey<ScaffoldState>();
   final ScrollController listController = ScrollController();
 
   late String pin;
-  late double _aspectRatio;
   bool animate = false;
 
   int get currentPinLength => pin.length;
@@ -60,38 +49,44 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
   void initState() {
     super.initState();
     pin = '';
-    _aspectRatio = 1;
-
-    if (widget.clearStream != null) {
-      widget.clearStream!.listen((val) {
-        if (val) {
-          clear();
-        }
-      });
-    }
-  }
-
-  void clear() {
-    if (_key.currentState?.mounted != null && _key.currentState!.mounted) {
-      setState(() => pin = '');
-    }
   }
 
   void reset() => setState(() {
         pin = '';
       });
 
-  void changeProcessText(String text) {}
+  void _onPressed(int num) async {
+    if (currentPinLength >= widget.pinLen) {
+      await HapticFeedback.heavyImpact();
+      return;
+    }
+    setState(() {
+      animate = false;
 
-  void close() {
-    Navigator.of(_key.currentContext!).pop();
+      pin += num.toString();
+      
+      widget.onFilledPin(pin);
+    });
+    Future.delayed(const Duration(milliseconds: 60)).then((value) {
+      setState(() {
+        animate = true;
+      });
+    });
+    listController.jumpTo(listController.position.maxScrollExtent);
   }
 
-  Color getFilledIndicatorColor(context) =>
-      widget.filledIndicatorColor ?? Theme.of(context).primaryColor;
+  void _onRemove() {
+    if (currentPinLength == 0) {
+      return;
+    }
+    setState(() => pin = pin.substring(0, pin.length - 1));
+  }
+
+  Color getPinColor(context) =>
+      widget.pinColor ?? Theme.of(context).primaryColor;
 
   Widget get pinCode => SizedBox(
-        height: widget.pinSize * (widget.pinInflateRatio + _aspectRatio),
+        height: widget.pinSize * widget.pinInflateRatio,
         child: ListView(
           controller: listController,
           scrollDirection: Axis.horizontal,
@@ -110,7 +105,7 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
                 curve: Curves.easeInOut,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: getFilledIndicatorColor(context),
+                  color: getPinColor(context),
                 ),
               );
             }
@@ -121,7 +116,7 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
               height: size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: getFilledIndicatorColor(context),
+                color: getPinColor(context),
               ),
             );
           }),
@@ -129,57 +124,30 @@ class PinCodeWidgetNewState<T extends PinCodeWidgetNew> extends State<T> {
       );
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        key: _key,
-        resizeToAvoidBottomInset: false,
-        body: SingleChildScrollView(
-          child: Container(
-            key: _gridViewKey,
-            child: Column(
-              children: [
-                Container(
-                  margin: widget.marginPincode,
-                  child: pinCode,
-                ),
-                KeyboardWidget(
-                  onPressed: _onPressed,
-                  onDeletePressed: _onRemove,
-                ),
-                widget.centerBottomWidget != null
-                    ? Flexible(
-                        flex: 2,
-                        child: Center(child: widget.centerBottomWidget!),
-                      )
-                    : const SizedBox(),
-              ],
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: widget.marginPincode,
+          child: pinCode,
+        ),
+        KeyboardWidget(
+          onPressed: _onPressed,
+          onDeletePressed: _onRemove,
+          authButton: ElevatedButton(
+            // заменить
+            style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                side: BorderSide(
+                    color: Theme.of(context).colorScheme.onPrimary, width: 2)),
+            onPressed: () {},
+            child: const Icon(
+              Icons.fingerprint,
+              size: 32,
             ),
           ),
         ),
-      );
-
-  void _onPressed(int num) async {
-    if (currentPinLength >= widget.pinLen) {
-      await HapticFeedback.heavyImpact();
-      return;
-    }
-    setState(() {
-      animate = false;
-
-      pin += num.toString();
-      widget.onChangedPin(pin);
-    });
-    Future.delayed(const Duration(milliseconds: 60)).then((value) {
-      setState(() {
-        animate = true;
-      });
-    });
-    listController.jumpTo(listController.position.maxScrollExtent);
-  }
-
-  void _onRemove() {
-    if (currentPinLength == 0) {
-      return;
-    }
-    setState(() => pin = pin.substring(0, pin.length - 1));
+      ],
+    );
   }
 }

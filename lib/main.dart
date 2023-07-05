@@ -10,7 +10,7 @@ class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   get newPin => PinCodeWidgetNew(
-        onChangedPin: (String pin) {},
+        onFilledPin: (String pin) {},
         pinLen: 4,
       );
 
@@ -25,12 +25,43 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: Container(
-              margin: const EdgeInsets.only(top: 100),
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(8),
-              child: newPin),
+        body: Container(
+          margin: const EdgeInsets.only(top: 50),
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "Введите код-пароль",
+                      style: TextStyle(
+                          fontSize: 24, color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                        width: 400,
+                        height: 650,
+                        alignment: Alignment.center,
+                        // padding: const EdgeInsets.all(8),
+                        child: newPin),
+                  ),
+                  // const SizedBox(height: 10),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        "Не можете войти?",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

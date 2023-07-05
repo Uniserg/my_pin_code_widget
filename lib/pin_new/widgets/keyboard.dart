@@ -15,8 +15,8 @@ class KeyboardStyle {
   const KeyboardStyle(
       {this.width = 400,
       this.height = 600,
-      this.horizontalSpacing = 30,
-      this.verticalSpacing = 30,
+      this.horizontalSpacing = 20,
+      this.verticalSpacing = 20,
       deleteButtonColor,
       onPressColorAnimation,
       buttonColor,
@@ -26,7 +26,11 @@ class KeyboardStyle {
       : _deleteButtonColor = deleteButtonColor,
         _onPressColorAnimation = onPressColorAnimation,
         _buttonColor = buttonColor,
-        _deleteIcon = deleteIcon ?? const Icon(Icons.arrow_back_rounded),
+        _deleteIcon = deleteIcon ??
+            const Icon(
+              Icons.backspace_rounded,
+              size: 32,
+            ),
         _numberStyle = numberStyle,
         _borderSide = borderSide;
 
@@ -45,16 +49,18 @@ class KeyboardStyle {
 }
 
 class KeyboardWidget extends StatelessWidget {
-  const KeyboardWidget({
-    super.key,
-    this.keyboardStyle = const KeyboardStyle(),
-    this.onPressed,
-    this.onDeletePressed,
-  });
+  const KeyboardWidget(
+      {super.key,
+      this.keyboardStyle = const KeyboardStyle(),
+      this.onPressed,
+      this.onDeletePressed,
+      this.authButton});
 
   final KeyboardStyle keyboardStyle;
   final Function()? onDeletePressed;
   final Function(int)? onPressed;
+
+  final Widget? authButton;
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +73,11 @@ class KeyboardWidget extends StatelessWidget {
           crossAxisCount: 3,
           mainAxisSpacing: keyboardStyle.verticalSpacing,
           crossAxisSpacing: keyboardStyle.horizontalSpacing,
+          physics: const NeverScrollableScrollPhysics(),
           children: List.generate(
             12,
             (index) {
-              if (index == 9) return Container();
-
+              if (index == 9) return authButton ?? Container();
               if (index == 11) {
                 return MergeSemantics(
                   child: ElevatedButton(
@@ -89,7 +95,6 @@ class KeyboardWidget extends StatelessWidget {
                 );
               } else if (index == 10) {
                 index = 0;
-              } else if (index == 11) {
               } else {
                 index++;
               }
