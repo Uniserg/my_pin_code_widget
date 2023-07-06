@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:my_pin_code_widget/src/notifiers/pin_notifier.dart';
 
+
+/// Pin-code field with hiding points
 class PinNumbersStyle {
+  /// Defines size of points
   final double pinSize;
-
+  /// Defines coefficient size factor of inflate animation
   final double pinInflateRatio;
-
+  /// Defines distanse between points
   final double pinSpacing;
-
+  /// Defines point color
   final Color? pinColor;
-
+  /// Defines color on failure authenticaton 
   final Color? failedPinColor;
 
   const PinNumbersStyle({
