@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_pin_code_widget/pin_new/flutter_pin_code_widget_new.dart';
-import 'package:my_pin_code_widget/pin_old/flutter_pin_code_widget_old.dart';
+import 'package:my_pin_code_widget/src/flutter_pin_code_widget.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,17 +8,10 @@ void main() {
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
-  get newPin => PinCodeWidgetNew(
+  get newPin => PinCodeWidget(
         onFilledPin: (String pin) {},
         onAuth: (pin) async => pin == "1234",
         pinLen: 4,
-      );
-
-  get oldPin => PinCodeWidgetOld(
-        onChangedPin: (String pin) {},
-        initialPinLength: 4,
-        onFullPin:
-            (String pin, PinCodeWidgetOldState<PinCodeWidgetOld> state) {},
       );
 
   @override
@@ -43,8 +35,8 @@ class MainApp extends StatelessWidget {
                   const SizedBox(height: 20),
                   Center(
                     child: Container(
-                        width: 400,
-                        height: 650,
+                        // width: 400,
+                        // height: 650,
                         alignment: Alignment.center,
                         // padding: const EdgeInsets.all(8),
                         child: newPin),
