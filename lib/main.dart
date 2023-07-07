@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_pin_code_widget/src/flutter_pin_code_widget.dart';
+import 'package:my_pin_code_widget/src/widgets/pin_numbers.dart';
 
 void main() {
   runApp(const MainApp());
@@ -12,6 +13,8 @@ class MainApp extends StatelessWidget {
         onFilledPin: (String pin) {},
         onAuth: (pin) async => pin == "1234",
         pinLen: 4,
+        pinNumbersStyle: PinNumbersStyle(
+            unfilledPinColor: Colors.blueAccent.withOpacity(0.5)),
       );
 
   @override
@@ -34,12 +37,8 @@ class MainApp extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Center(
-                    child: Container(
-                        // width: 400,
-                        // height: 650,
-                        alignment: Alignment.center,
-                        // padding: const EdgeInsets.all(8),
-                        child: newPin),
+                    child:
+                        Container(alignment: Alignment.center, child: newPin),
                   ),
                   // const SizedBox(height: 10),
                   Center(

@@ -10,7 +10,7 @@ class PinCodeWidget extends StatefulWidget {
     required this.onFilledPin,
     required this.onAuth,
     this.keyboardStyle = const KeyboardStyle(),
-    this.marginPincode = const EdgeInsets.only(bottom: 10),
+    this.marginPincode = const EdgeInsets.only(bottom: 0),
     this.authButton,
     this.pinNumbersStyle = const PinNumbersStyle(),
   });

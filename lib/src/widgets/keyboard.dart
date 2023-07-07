@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class KeyboardStyle {
-  final Color? _deleteButtonColor;
-  final Color? _onPressColorAnimation;
-  final Color? _buttonColor;
-  final Icon _deleteIcon;
-  final TextStyle? _numberStyle;
-  final BorderSide? _borderSide;
+  final Color? deleteButtonColor;
+  final Color? onPressColorAnimation;
+  final Color? buttonColor;
+  final Icon deleteIcon;
+  final TextStyle? numberStyle;
+  final BorderSide? borderSide;
   final double width;
   final double height;
   final double horizontalSpacing;
@@ -17,35 +17,24 @@ class KeyboardStyle {
       this.height = 600,
       this.horizontalSpacing = 20,
       this.verticalSpacing = 20,
-      deleteButtonColor,
-      onPressColorAnimation,
-      buttonColor,
-      deleteIcon,
-      numberStyle,
-      borderSide})
-      : _deleteButtonColor = deleteButtonColor,
-        _onPressColorAnimation = onPressColorAnimation,
-        _buttonColor = buttonColor,
-        _deleteIcon = deleteIcon ??
-            const Icon(
-              Icons.backspace_rounded,
-              size: 32,
-            ),
-        _numberStyle = numberStyle,
-        _borderSide = borderSide;
+      this.deleteButtonColor,
+      this.onPressColorAnimation,
+      this.buttonColor,
+      this.deleteIcon = const Icon(Icons.backspace_outlined),
+      this.numberStyle,
+      this.borderSide});
 
   Color getButtonColor(BuildContext context) =>
-      _buttonColor ?? Theme.of(context).primaryColor;
+      buttonColor ?? Theme.of(context).primaryColor;
   Color getDeleteButtonColor(BuildContext context) =>
-      _deleteButtonColor ?? Theme.of(context).colorScheme.error;
+      deleteButtonColor ?? Theme.of(context).colorScheme.error;
   Color getOnPressColorAnimation(BuildContext context) =>
-      _onPressColorAnimation ?? Theme.of(context).primaryColorLight;
+      onPressColorAnimation ?? Theme.of(context).primaryColorLight;
   BorderSide getBorderSide(BuildContext context) =>
-      _borderSide ??
+      borderSide ??
       BorderSide(color: Theme.of(context).colorScheme.onPrimary, width: 2);
   TextStyle? getNumberStyle(BuildContext context) =>
-      _numberStyle ?? Theme.of(context).primaryTextTheme.displayMedium;
-  Icon get deleteIcon => _deleteIcon;
+      numberStyle ?? Theme.of(context).primaryTextTheme.displayMedium;
 }
 
 class KeyboardWidget extends StatelessWidget {
