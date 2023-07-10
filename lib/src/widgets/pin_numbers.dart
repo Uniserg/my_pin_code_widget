@@ -50,15 +50,14 @@ class PinNumbersWidget extends StatelessWidget {
   final PinNumbersStyle style;
 
   Color getPinColor(BuildContext context) {
-    return (pinNotifier.isAuth == null || pinNotifier.isAuth)
+    return (pinNotifier.isAuth == null || pinNotifier.isAuth!)
         ? style.getPinPrimaryColor(context)
         : style.getPinFailedColor(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    double size = max(style.pinSize * style.pinInflateRatio,
-        style.pinJoggleRatio * style.pinSpacing);
+    double size = max(style.pinSize * style.pinInflateRatio, style.pinJoggleRatio * style.pinSpacing);
 
     return AnimatedBuilder(
       animation: pinNotifier,

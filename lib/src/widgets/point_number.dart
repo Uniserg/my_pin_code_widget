@@ -64,7 +64,7 @@ class _PointNumberState extends State<PointNumber>
     }
 
     Color getPinColor(BuildContext context) =>
-        (pinNotifier.isAuth == null || pinNotifier.isAuth)
+        (pinNotifier.isAuth == null || pinNotifier.isAuth!)
             ? style.getPinPrimaryColor(context)
             : style.getPinFailedColor(context);
 
@@ -75,8 +75,7 @@ class _PointNumberState extends State<PointNumber>
         builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: TextDirection.ltr,
-            child: Container(
-              // padding: const EdgeInsets.all(1),
+            child: SizedBox(
               width: size,
               child: Stack(
                 alignment: Alignment.center,

@@ -13,9 +13,12 @@ class PinCodeWidget extends StatefulWidget {
     this.marginPincode = const EdgeInsets.only(bottom: 0),
     this.authButton,
     this.pinNumbersStyle = const PinNumbersStyle(),
+    this.onFailureHint = const SizedBox(),
   });
 
   final KeyboardStyle keyboardStyle;
+
+  final Widget onFailureHint;
 
   final PinNumbersStyle pinNumbersStyle;
 
@@ -37,43 +40,72 @@ class PinCodeWidgetState<T extends PinCodeWidget> extends State<T> {
   late PinNotifier pinNotifier = PinNotifier(widget.pinLen);
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     pinNotifier.dispose();
     super.dispose();
   }
 
-  void _refresh() {
-    if (pinNotifier.isFilled) {
-      pinNotifier.clear();
-    }
-  }
-
   void _onPressed(int num) async {
-    _refresh();
     pinNotifier.addNum(num);
 
     if (pinNotifier.isFilled) {
-      pinNotifier.isAuth = await widget.onAuth(pinNotifier.pin);
+      var isAuth = await widget.onAuth(pinNotifier.pin);
+      pinNotifier.isAuth = isAuth;
+
+      // if (!isAuth) {
+      //   Future.delayed(const Duration(milliseconds: 1000), () {
+      //     pinNotifier.clear();
+      //   });
+
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        pinNotifier.clear();
+      });
     }
   }
 
   void _onRemove() {
-    _refresh();
     if (pinNotifier.pinLen == 0) {
       return;
     }
     pinNotifier.pop();
   }
 
+  bool get isFailure => !(pinNotifier.isAuth == null || pinNotifier.isAuth!);
+
+  // Widget get titleHint => isFailure ? widget.onFailureHint : const SizedBox();
+
+  get keyboard => KeyboardWidget(
+        onPressed: _onPressed,
+        keyboardStyle: widget.keyboardStyle,
+        onDeletePressed: _onRemove,
+        authButton: ElevatedButton(
+          // заменить
+          style: ElevatedButton.styleFrom(
+              shape: const CircleBorder(),
+              side: BorderSide(
+                  color: Theme.of(context).colorScheme.onPrimary, width: 2)),
+          onPressed: () {},
+          child: const Icon(
+            Icons.fingerprint,
+            size: 32,
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        AnimatedBuilder(
+          animation: pinNotifier,
+          builder: (BuildContext context, Widget? child) => Visibility(
+            visible: isFailure,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: widget.onFailureHint,
+          ),
+        ),
         Container(
           margin: widget.marginPincode,
           child: PinNumbersWidget(
@@ -82,21 +114,11 @@ class PinCodeWidgetState<T extends PinCodeWidget> extends State<T> {
             style: widget.pinNumbersStyle,
           ),
         ),
-        KeyboardWidget(
-          onPressed: _onPressed,
-          keyboardStyle: widget.keyboardStyle,
-          onDeletePressed: _onRemove,
-          authButton: ElevatedButton(
-            // заменить
-            style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                side: BorderSide(
-                    color: Theme.of(context).colorScheme.onPrimary, width: 2)),
-            onPressed: () {},
-            child: const Icon(
-              Icons.fingerprint,
-              size: 32,
-            ),
+        AnimatedBuilder(
+          animation: pinNotifier,
+          builder: (BuildContext context, Widget? child) => AbsorbPointer(
+            absorbing: pinNotifier.isFilled,
+            child: keyboard,
           ),
         ),
       ],

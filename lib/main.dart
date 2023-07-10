@@ -12,9 +12,16 @@ class MainApp extends StatelessWidget {
   get newPin => PinCodeWidget(
         onFilledPin: (String pin) {},
         onAuth: (pin) async => pin == "1234",
+        onFailureHint: const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            "Неверный пин-код! Попробуйте еще раз.",
+            style: TextStyle(color: Colors.red, fontSize: 18),
+          ),
+        ),
         pinLen: 4,
-        pinNumbersStyle: PinNumbersStyle(
-            unfilledPinColor: Colors.blueAccent.withOpacity(0.5)),
+        pinNumbersStyle:
+            PinNumbersStyle(unfilledPinColor: Colors.blue.withOpacity(0.5)),
       );
 
   @override
@@ -40,7 +47,6 @@ class MainApp extends StatelessWidget {
                     child:
                         Container(alignment: Alignment.center, child: newPin),
                   ),
-                  // const SizedBox(height: 10),
                   Center(
                     child: TextButton(
                       onPressed: () {},

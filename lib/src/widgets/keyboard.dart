@@ -55,6 +55,7 @@ class KeyboardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
+        padding: const EdgeInsets.all(8.0),
         alignment: Alignment.center,
         width: keyboardStyle.width,
         height: keyboardStyle.height,

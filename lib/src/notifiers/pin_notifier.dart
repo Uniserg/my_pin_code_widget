@@ -71,9 +71,11 @@ class PinNotifier extends ChangeNotifier {
     }
   }
 
-  get isAuth => _isAuth;
+  bool? get isAuth => _isAuth;
 
   void addNum(int num) {
+    if (_pinLen >= pinCap) return;
+
     var point = _pin[_pinLen];
     point.num = num;
     _pinLen++;
@@ -90,8 +92,8 @@ class PinNotifier extends ChangeNotifier {
 
   void clear() {
     isFilled = false;
+    isAuth = null;
     _pinLen = 0;
-    _isAuth = null;
 
     for (var point in _pin) {
       point.filled = false;
@@ -99,6 +101,7 @@ class PinNotifier extends ChangeNotifier {
   }
 
   void pop() {
+    isFilled = false;
     if (_pinLen > 0) {
       _pin[_pinLen - 1].filled = false;
       _pinLen--;
